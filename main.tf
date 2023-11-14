@@ -68,6 +68,16 @@ resource "aws_security_group_rule" "sgr-ingress" {
   cidr_blocks      = [var.vpc_cidr_bloc]
 }
 
+resource "aws_security_group_rule" "allow-ssh" {
+  type = "ingress"
+  from_port = 22
+  to_port = 22
+  protocol = "tcp" #Ne marche pas avec "ssh", bizarre
+  security_group_id = aws_security_group.nat.id
+  cidr_blocks = [
+    "0.0.0.0/0"]
+}
+
 resource "aws_key_pair" "mykey" {
   key_name   = "ma-vraie-clef"
   public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDgy/D5TmgdyzH9qkcd1puB+WQ+nW0VNSvnUBhAJCWju tony"

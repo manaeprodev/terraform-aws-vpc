@@ -6,7 +6,7 @@ variable "aws_region" {
 variable "vpc_cidr_bloc" {
   type  = string
   description = "Le block CIDR du VPC"
-  default = "172.18.0.0/19"
+  default = "172.20.0.0/16"
 }
 
 variable "vpc_name" {
