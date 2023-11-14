@@ -69,8 +69,8 @@ resource "aws_security_group_rule" "sgr-ingress" {
 }
 
 resource "aws_key_pair" "mykey" {
-  key_name   = "ma-clef"
-  public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINv1uCUe1MhGX0lT7x9GX7iqSL5j4LbeWhIB/uKxttXN coucoutoto"
+  key_name   = "ma-vraie-clef"
+  public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDgy/D5TmgdyzH9qkcd1puB+WQ+nW0VNSvnUBhAJCWju tony"
 }
 
 resource "aws_instance" "nat" {
