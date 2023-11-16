@@ -53,6 +53,23 @@ data "aws_ami" "ami" {
   ]
 }
 
+
+data "aws_ami" "ubuntu"{
+  most_recent      = true
+  owners           = ["099720109477"]
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+  }
+
+  filter{
+    name = "virtualization-type"
+    values = ["hvm"]
+  }
+
+}
+
 resource "aws_security_group" "nat" {
   name = "nat"
   description = "Allow TLS inbound traffic"
@@ -67,7 +84,14 @@ resource "aws_security_group_rule" "sgr-ingress" {
   security_group_id = aws_security_group.nat.id
   cidr_blocks      = [var.vpc_cidr_bloc]
 }
-
+resource "aws_security_group_rule" "sgr2" {
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = "${aws_security_group.nat.id}"
+}
 resource "aws_security_group_rule" "allow-ssh" {
   type = "ingress"
   from_port = 22
@@ -75,7 +99,8 @@ resource "aws_security_group_rule" "allow-ssh" {
   protocol = "tcp" #Ne marche pas avec "ssh", bizarre
   security_group_id = aws_security_group.nat.id
   cidr_blocks = [
-    "0.0.0.0/0"]
+    "0.0.0.0/0"
+  ]
 }
 
 resource "aws_key_pair" "mykey" {
@@ -89,7 +114,21 @@ resource "aws_instance" "nat" {
   instance_type = "t2.micro"
   subnet_id = aws_subnet.public[each.key].id
   vpc_security_group_ids = [aws_security_group.nat.id]
+  source_dest_check = false
   key_name = aws_key_pair.mykey.key_name
+}
+
+resource "aws_instance" "instance_private" {
+  for_each = var.azs
+  ami = data.aws_ami.ubuntu.id
+  tags = {
+    Name = "${var.vpc_name}-instance-private-${var.aws_region}${each.key}"
+  }
+  instance_type = "t2.micro"
+  vpc_security_group_ids = [aws_security_group.nat.id]
+  key_name = aws_key_pair.mykey.key_name
+  source_dest_check = false
+  subnet_id = aws_subnet.private[each.key].id
 }
 
 resource "aws_eip" "eip_pub" {
